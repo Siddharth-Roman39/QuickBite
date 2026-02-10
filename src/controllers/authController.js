@@ -22,8 +22,9 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ message: 'User already exists' });
         }
 
-        // Basic role validation (prevent creating admins publicly if needed, currently open for migration)
-        const userRole = role || 'student';
+        // Force 'student' role for public registration to prevent privilege escalation
+        // Admin accounts should be created directly in the database or via a protected seed script
+        const userRole = 'student';
 
         const user = await User.create({
             email,
