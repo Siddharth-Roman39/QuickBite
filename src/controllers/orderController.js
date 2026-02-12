@@ -184,10 +184,10 @@ const updateOrderStatus = async (req, res, next) => {
             const io = req.app.get('io');
             if (io) {
                 // 1. Notify the User (Student)
-                // Assuming order.userId is populated, we need the _id string
-                const userId = updatedOrder.userId._id.toString();
-
-                io.to(`user_${userId}`).emit('order:update', updatedOrder);
+                if (updatedOrder.userId && updatedOrder.userId._id) {
+                    const userId = updatedOrder.userId._id.toString();
+                    io.to(`user_${userId}`).emit('order:update', updatedOrder);
+                }
 
                 // 2. Notify Staff (Sync)
                 io.to('staff_room').emit('order:update', updatedOrder);
