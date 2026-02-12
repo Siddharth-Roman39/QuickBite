@@ -41,4 +41,10 @@ const orderSchema = new mongoose.Schema({
     deliveredAt: Date
 });
 
+// Indexes for performance
+orderSchema.index({ status: 1 }); // Filtering by status (live orders)
+orderSchema.index({ userId: 1 }); // Filtering by user
+orderSchema.index({ placedAt: -1 }); // Sorting by date
+orderSchema.index({ tokenNumber: 1 }); // Searching by token
+
 module.exports = mongoose.model('Order', orderSchema);
