@@ -93,7 +93,7 @@ const placeOrder = async (req, res, next) => {
         // Populate user info and food items for socket payload
         await createdOrder.populate([
             { path: 'userId', select: 'email profile' },
-            { path: 'items.foodItemId', select: 'name price image' }
+            { path: 'items.foodItemId', select: 'name price imageUrl' }
         ]);
 
         // Socket.IO: Notify Staff
@@ -177,7 +177,7 @@ const updateOrderStatus = async (req, res, next) => {
             // Populate necessary fields for frontend
             await updatedOrder.populate([
                 { path: 'userId', select: 'email profile' },
-                { path: 'items.foodItemId', select: 'name price image' }
+                { path: 'items.foodItemId', select: 'name price imageUrl' }
             ]);
 
             // Socket.IO: Notify Student & Staff
