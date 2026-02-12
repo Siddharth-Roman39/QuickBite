@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+// Ensure FoodItem model is registered before Order uses it
+require('./FoodItem');
 
 const orderSchema = new mongoose.Schema({
     userId: {
