@@ -90,12 +90,16 @@ const placeOrder = async (req, res, next) => {
 
         const createdOrder = await order.save();
 
-        // Populate user info for socket payload
-        await createdOrder.populate('userId', 'email profile');
+        // Populate user info and food items for socket payload
+        await createdOrder.populate([
+            { path: 'userId', select: 'email profile' },
+            { path: 'items.foodItemId', select: 'name price image' }
+        ]);
 
         // Socket.IO: Notify Staff
-        if (global.io) {
-            global.io.to('staff_room').emit('order:new', createdOrder);
+        const io = req.app.get('io');
+        if (io) {
+            io.to('staff_room').emit('order:new', createdOrder);
         }
 
         res.status(201).json(createdOrder);
@@ -160,19 +164,36 @@ const updateOrderStatus = async (req, res, next) => {
 
             order.status = status;
 
-            if (status === 'preparing') order.preparedAt = new Date();
-            if (status === 'prepared' || status === 'ready') order.readyAt = new Date(); // Handle both terms if frontend sends 'ready'
-            if (status === 'delivered' || status === 'completed') order.deliveredAt = new Date();
+            if (status === 'preparing') {
+                order.preparedAt = new Date();
+            } else if (status === 'prepared' || status === 'ready') {
+                order.readyAt = new Date();
+            } else if (status === 'delivered' || status === 'completed') {
+                order.deliveredAt = new Date();
+            }
 
             const updatedOrder = await order.save();
 
+            // Populate necessary fields for frontend
+            await updatedOrder.populate([
+                { path: 'userId', select: 'email profile' },
+                { path: 'items.foodItemId', select: 'name price image' }
+            ]);
+
             // Socket.IO: Notify Student & Staff
-            if (global.io) {
-                global.io.to(`user_${order.userId}`).emit('order:update', updatedOrder);
-                global.io.to('staff_room').emit('order:update', updatedOrder);
+            const io = req.app.get('io');
+            if (io) {
+                // 1. Notify the User (Student)
+                // Assuming order.userId is populated, we need the _id string
+                const userId = updatedOrder.userId._id.toString();
+
+                io.to(`user_${userId}`).emit('order:update', updatedOrder);
+
+                // 2. Notify Staff (Sync)
+                io.to('staff_room').emit('order:update', updatedOrder);
 
                 if (status === 'completed') {
-                    global.io.emit('admin:summary:update');
+                    io.emit('admin:summary:update');
                 }
             }
 

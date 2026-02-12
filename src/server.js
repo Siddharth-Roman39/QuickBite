@@ -35,9 +35,8 @@ io.on('connection', (socket) => {
   });
 });
 
-// Make io accessible globally via app locals if needed, or export it
-// A cleaner way is to attach it to the request object in app.js middleware or use a singleton
-global.io = io; 
+// Make io accessible in controllers
+app.set('io', io); 
 
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

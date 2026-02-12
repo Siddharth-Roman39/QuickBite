@@ -1,7 +1,7 @@
 # Backend API Documentation & Supabase Migration Mapping
 
 ## Base URL
-`http://localhost:5000/api`
+`https://quickbite-e8kn.onrender.com/api`
 
 ## 1. Authentication
 **Supabase Replaced:** `Supabase.auth`
