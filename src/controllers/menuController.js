@@ -30,12 +30,17 @@ const addMenuItem = async (req, res) => {
             isVeg, isAvailable, description, ingredients, waitingTime
         } = req.body;
 
+        let imageUrlFromReq = imageUrl;
+        if (req.file && req.file.path) {
+            imageUrlFromReq = req.file.path;
+        }
+
         const menuItem = new Menu({
             name,
             category,
             subCategory,
             price,
-            imageUrl,
+            imageUrl: imageUrlFromReq,
             isVeg: isVeg !== undefined ? isVeg : true,
             isAvailable: isAvailable !== undefined ? isAvailable : true,
             description,
@@ -60,6 +65,11 @@ const updateMenuItem = async (req, res) => {
             isVeg, isAvailable, description, ingredients, waitingTime
         } = req.body;
 
+        let newImageUrl = imageUrl;
+        if (req.file && req.file.path) {
+            newImageUrl = req.file.path;
+        }
+
         const item = await Menu.findById(req.params.id);
 
         if (item) {
@@ -67,7 +77,7 @@ const updateMenuItem = async (req, res) => {
             item.category = category || item.category;
             item.subCategory = subCategory || item.subCategory;
             if (price !== undefined) item.price = price;
-            item.imageUrl = imageUrl || item.imageUrl;
+            item.imageUrl = newImageUrl || item.imageUrl;
             if (isVeg !== undefined) item.isVeg = isVeg;
             if (isAvailable !== undefined) item.isAvailable = isAvailable;
             item.description = description || item.description;
