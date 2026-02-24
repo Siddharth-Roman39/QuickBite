@@ -10,7 +10,7 @@ const generateTokenNumber = require('../utils/tokenGenerator');
 // @access  Private (Student)
 const placeOrder = async (req, res, next) => {
     try {
-        const { items, totalAmount, orderType, paymentMethod } = req.body;
+        const { items, totalAmount, orderType, paymentMethod, pickupTime } = req.body;
 
         if (!items || items.length === 0) {
             res.status(400);
@@ -45,6 +45,31 @@ const placeOrder = async (req, res, next) => {
                 name: foodItem.name,
                 price: foodItem.price
             });
+        }
+
+        if (!pickupTime) {
+            res.status(400);
+            throw new Error('pickupTime is required');
+        }
+
+        const parsedPickupTime = new Date(pickupTime);
+        if (isNaN(parsedPickupTime.getTime())) {
+            res.status(400);
+            throw new Error('Invalid pickupTime format');
+        }
+
+        const now = new Date();
+        // Allow a small 1-minute grace period for network latency
+        if (parsedPickupTime.getTime() < now.getTime() - 60000) {
+            res.status(400);
+            throw new Error('pickupTime cannot be in the past');
+        }
+
+        const hours = parsedPickupTime.getHours();
+        const minutes = parsedPickupTime.getMinutes();
+        if (hours < 9 || hours > 18 || (hours === 18 && minutes > 0)) {
+            res.status(400);
+            throw new Error('pickupTime must be between 9:00 AM and 6:00 PM');
         }
 
         const user = await User.findById(req.user._id);
@@ -84,6 +109,7 @@ const placeOrder = async (req, res, next) => {
             paymentStatus: (method === 'wallet' || method === 'cash') ? 'paid' : 'pending',
             status: 'placed',
             placedAt: new Date(),
+            pickupTime: parsedPickupTime, // Save pickup time
             orderNumber: orderNumber, // Save ID
             tokenNumber: tokenNumber // Save Token
         });

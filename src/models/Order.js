@@ -36,6 +36,7 @@ const orderSchema = new mongoose.Schema({
     paymentMethod: { type: String, default: 'Wallet' },
     paymentStatus: { type: String, default: 'pending' },
     placedAt: { type: Date, default: Date.now },
+    pickupTime: { type: Date, required: true },
     preparedAt: Date,
     readyAt: Date,
     deliveredAt: Date
