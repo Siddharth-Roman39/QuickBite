@@ -65,11 +65,14 @@ const placeOrder = async (req, res, next) => {
             throw new Error('pickupTime cannot be in the past');
         }
 
-        const hours = parsedPickupTime.getHours();
-        const minutes = parsedPickupTime.getMinutes();
+        // Calculate IST time by adding UTC offset (+5:30)
+        const istTime = new Date(parsedPickupTime.getTime() + (5.5 * 60 * 60 * 1000));
+        const hours = istTime.getUTCHours();
+        const minutes = istTime.getUTCMinutes();
+
         if (hours < 9 || hours > 18 || (hours === 18 && minutes > 0)) {
             res.status(400);
-            throw new Error('pickupTime must be between 9:00 AM and 6:00 PM');
+            throw new Error('pickupTime must be between 9:00 AM and 6:00 PM (IST)');
         }
 
         const user = await User.findById(req.user._id);
