@@ -148,7 +148,8 @@ const getMyOrders = async (req, res, next) => {
 
         const orders = await Order.find(query)
             .populate('userId', 'profile email')
-            .sort({ placedAt: -1 });
+            .sort({ placedAt: -1 })
+            .limit(100);
 
         res.json(orders);
     } catch (error) {
@@ -165,7 +166,8 @@ const getLiveOrders = async (req, res, next) => {
             status: { $in: ['placed', 'preparing', 'prepared'] }
         })
             .populate('userId', 'profile email')
-            .sort({ placedAt: 1 });
+            .sort({ placedAt: 1 })
+            .limit(100);
 
         res.json(orders);
     } catch (error) {
