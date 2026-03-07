@@ -51,6 +51,12 @@ router.post('/login', protect, async (req, res) => {
         });
 
         await newLog.save();
+
+        const io = req.app.get('io');
+        if (io) {
+            io.emit('admin:summary:update');
+        }
+
         res.status(201).json(newLog);
     } catch (error) {
         console.error('Login log error:', error);
@@ -71,6 +77,12 @@ router.post('/logout', protect, async (req, res) => {
             session.logoutTime = new Date();
             session.action = 'LOGOUT'; // Update action status if we want
             await session.save();
+
+            const io = req.app.get('io');
+            if (io) {
+                io.emit('admin:summary:update');
+            }
+
             res.json(session);
         } else {
             res.status(404).json({ message: 'No active session found' });

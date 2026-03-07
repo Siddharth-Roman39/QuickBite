@@ -1,4 +1,5 @@
 const Order = require('../models/Order');
+const StaffLog = require('../models/StaffLog');
 
 // @desc    Get admin summary (Revenue, Counts)
 // @route   GET /api/admin/summary
@@ -82,11 +83,14 @@ const getAdminSummary = async (req, res, next) => {
             cashOrders: 0
         };
 
+        const activeStaffCount = await StaffLog.countDocuments({ logoutTime: null });
+
         res.json({
             totalRevenue: result.totalRevenue || 0,
             totalOrders: result.totalOrders || 0,
             walletOrders: result.walletOrders || 0,
-            cashOrders: result.cashOrders || 0
+            cashOrders: result.cashOrders || 0,
+            activeStaff: activeStaffCount
         });
 
     } catch (error) {
